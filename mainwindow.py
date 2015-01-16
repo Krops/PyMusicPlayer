@@ -5,7 +5,7 @@ from PyQt4.QtGui import *
 
 app = QApplication(sys.argv) #ignore()
 window = QWidget()
-window.setWindowTitle("PyMuicPlayer")
+window.setWindowTitle("PyMusicPlayer")
 window.show()
 
 # [Add widgets to the widget]
