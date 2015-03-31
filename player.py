@@ -1,11 +1,8 @@
 import gi
 gi.require_version("Gst", "1.0")
-from gi.repository import Gtk
-from gi.repository import GObject
 from gi.repository import Gst
 import signal
 Gst.init(None)
-#GObject.threads_init()
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 class Player:
     def __init__(self,song_name='started'):
@@ -35,15 +32,13 @@ class Player:
         message_bus.connect('message', self.message_handler)
         self.pipeline.get_by_name('volume').set_property('volume', 1)
         self.pipeline.set_state(Gst.State.PAUSED)
-        #Gtk.main()
-        
         
     def play_stop(self):
         if self.pipeline.get_state(0)[1] == Gst.State.PLAYING:
             self.pipeline.set_state(Gst.State.PAUSED)
             print('paused')
             
-        elif self.pipeline.get_state(0)[1] == Gst.State.PAUSED:
+        elif self.pipeline.get_state(0)[1] == Gst.State.PAUSED or self.pipeline.get_state(0)[1] == Gst.State.NULL:
             self.pipeline.set_state(Gst.State.PLAYING)
             print('playing')
         
@@ -54,15 +49,17 @@ class Player:
         pass
     def setVolume(self,vol):
         pass
-    def play(self):
-        self.pipeline.set_state(Gst.State.PLAYING)
+    def play_next(self,location):
+        self.pipeline.set_state(Gst.State.NULL)
+        self.pipeline.get_by_name('source').set_property('location', location)
+        self.play_stop()
+        
 
     def message_handler(self, bus, message):
 
         struct = message.get_structure()
         if message.type == Gst.MessageType.EOS:
             print('END')
-            Gtk.main_quit()
         elif message.type == Gst.MessageType.TAG and message.parse_tag() and struct.has_field('taglist'):
             print('meta tags')
             taglist = struct.get_value('taglist')
