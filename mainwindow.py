@@ -11,14 +11,21 @@ class Mainwindow(QWidget):
         playbut = QPushButton(">")
         nextbut = QPushButton(">>")
         prevbut = QPushButton("<<")
+        openbut = QPushButton("^")
         songslide = QSlider(1)
+        volumeslide = QSlider(1)
+        #listlay = QHBoxLayout()
         playlist = QTableView()
+        #listlay.addWidget(playlist)
+        #listlay.addWidget(volumeslide)
         mainlayout = QVBoxLayout()
         butlayout = QHBoxLayout()
         butlayout.addWidget(prevbut)
         butlayout.addWidget(playbut)
         butlayout.addWidget(nextbut)
+        butlayout.addWidget(openbut)
         mainlayout.addWidget(songtags)
+        mainlayout.addWidget(volumeslide)
         mainlayout.addLayout(butlayout)
         mainlayout.addWidget(songslide)
         mainlayout.addWidget(playlist)
@@ -28,8 +35,8 @@ class Mainwindow(QWidget):
         QObject.connect(playbut, SIGNAL('clicked()'), self, SLOT('play()'))
         QObject.connect(nextbut, SIGNAL('clicked()'), self, SLOT('nextsong()'))
         QObject.connect(prevbut, SIGNAL('clicked()'), self, SLOT('prevsong()'))
-        #self.player.play_stop()
-        #self.player.play_stop()
+        QObject.connect(openbut, SIGNAL('clicked()'), self, SLOT('Open_Song()'))
+
     @pyqtSlot()
     def play(self):
         self.player.play_stop()
@@ -39,6 +46,10 @@ class Mainwindow(QWidget):
     @pyqtSlot()
     def prevsong(self):
         print('prev')
+    @pyqtSlot()
+    def Open_Song(self):
+        file_name = QFileDialog.getOpenFileName(self,"Open Files", "/home/krop", "All Files (*.ogg)")
+        self.player.play_next(file_name)
         
         
 if __name__ == "__main__":
