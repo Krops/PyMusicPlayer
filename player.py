@@ -44,11 +44,11 @@ class Player:
         
             
     def shift_to(self,shift_time):
-        pass
+        self.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.SKIP, shift_time)
     def indicate(self):
         pass
     def setVolume(self,vol):
-        pass
+        self.pipeline.get_by_name('volume').set_property('volume', vol)
     def play_next(self,location):
         self.pipeline.set_state(Gst.State.NULL)
         self.pipeline.get_by_name('source').set_property('location', location)
