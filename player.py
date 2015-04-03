@@ -44,7 +44,7 @@ class Player:
         
             
     def shift_to(self,shift_time):
-        self.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.SKIP, shift_time)
+        self.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, shift_time*Gst.SECOND)
     def indicate(self):
         pass
     def setVolume(self,vol):
@@ -53,8 +53,18 @@ class Player:
         self.pipeline.set_state(Gst.State.NULL)
         self.pipeline.get_by_name('source').set_property('location', location)
         self.play_stop()
+        while self.pipeline.query_duration(Gst.Format.TIME)[0]==False:
+            pass
+        else:
+            time = self.pipeline.query_duration(Gst.Format.TIME)
+            print(time[0],time[1])
+            return int(self.pipeline.query_duration(Gst.Format.TIME)[1] / Gst.SECOND)
+        #print(time[0],time[1])
         
+    
 
+        
+    
     def message_handler(self, bus, message):
 
         struct = message.get_structure()
@@ -65,9 +75,14 @@ class Player:
             taglist = struct.get_value('taglist')
             for x in range(taglist.n_tags()):
                 name = taglist.nth_tag_name(x)
-                print('  %s: %s' % (name, taglist.get_string(name)[1]))
+                print(' %s - %s' % (name, taglist.get_string(name)[1]))
+            #time = self.pipeline.query_duration(Gst.Format.TIME)
+            #print(time[0],time[1])
         else:
             pass
+        
+    
+    
 if __name__ == "__main__":
     player = Player('/home/krop/Documents/Projects/PyMusicPlayer/song.ogg')
     player.play_stop()
