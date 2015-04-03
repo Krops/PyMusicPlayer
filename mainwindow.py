@@ -51,6 +51,7 @@ class Mainwindow(QWidget):
         self.player.play_stop()
     @pyqtSlot()
     def nextsong(self):
+        self.player.song_time()
         print('next')
     @pyqtSlot()
     def prevsong(self):
@@ -58,7 +59,10 @@ class Mainwindow(QWidget):
     @pyqtSlot()
     def Open_Song(self):
         file_name = QFileDialog.getOpenFileName(self,"Open Files", "~", "All Files (*.ogg)")
-        self.player.play_next(file_name)
+        #self.player.play_next()
+        self.songslide.setMaximum(self.player.play_next(file_name))
+        #self.player.song_time()
+        
     @pyqtSlot(int)
     def Volume_Set(self,vol):
         print(self.volumeslide.sliderPosition())
