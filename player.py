@@ -2,6 +2,7 @@ import gi
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst
 import signal
+import datetime
 Gst.init(None)
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 class Player:
@@ -17,6 +18,8 @@ class Player:
         audioconvert = Gst.ElementFactory.make('audioconvert', 'audioconvert')
         volume = Gst.ElementFactory.make('volume', 'volume')
         audiosink = Gst.ElementFactory.make('autoaudiosink', 'audio-output')
+        clock = Gst.ElementFactory.make('gstclock','clock')
+        
         def on_pad_added(decodebin, pad):
             pad.link(audioconvert.get_static_pad('sink'))
         decodebin.connect('pad-added', on_pad_added)
@@ -32,6 +35,8 @@ class Player:
         message_bus.connect('message', self.message_handler)
         self.pipeline.get_by_name('volume').set_property('volume', 1)
         self.pipeline.set_state(Gst.State.PAUSED)
+        self.bs_time=self.pipeline.base_time
+        
         
     def play_stop(self):
         if self.pipeline.get_state(0)[1] == Gst.State.PLAYING:
@@ -45,6 +50,11 @@ class Player:
             
     def shift_to(self,shift_time):
         self.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, shift_time*Gst.SECOND)
+        time = float(self.pipeline.query_position(Gst.Format.TIME)[1]) / Gst.SECOND
+        #delta = datetime.timedelta(seconds=(time[1] / Gst.SECOND))
+        #print(shift_time*Gst.SECOND)
+        print(time)
+        #print(self.pipeline.get_clock().get_internal_time()-self.bs_time)
     def indicate(self):
         pass
     def setVolume(self,vol):
@@ -53,15 +63,24 @@ class Player:
         self.pipeline.set_state(Gst.State.NULL)
         self.pipeline.get_by_name('source').set_property('location', location)
         self.play_stop()
-        while self.pipeline.query_duration(Gst.Format.TIME)[0]==False:
+        print(self.pipeline.get_state(0))
+        #self.pipeline.query_duration(Gst.Format.TIME)[0]
+        
+        while(self.pipeline.get_state(0)[1]!=Gst.State.PLAYING):
+            print(self.pipeline.get_state(0)[1])
             pass
         else:
-            time = self.pipeline.query_duration(Gst.Format.TIME)
-            print(time[0],time[1])
-            return int(self.pipeline.query_duration(Gst.Format.TIME)[1] / Gst.SECOND)
+            print(float(self.pipeline.query_duration(Gst.Format.TIME)[1])/ Gst.SECOND)
+            return self.pipeline.query_duration(Gst.Format.TIME)[1]/ Gst.SECOND
+        #delta = datetime.timedelta(seconds=(time[1] / Gst.SECOND))
+        #print(delta)
+        #return int(self.pipeline.query_duration(Gst.Format.TIME)[1] / Gst.SECOND)
+        #self.bs_time=self.pipeline.base_time
         #print(time[0],time[1])
         
-    
+    def song_duration(self):
+        print(self.pipeline.get_state(0)[1])
+        return self.pipeline.query_duration(Gst.Format.TIME)[1]/ Gst.SECOND
 
         
     
