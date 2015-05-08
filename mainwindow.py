@@ -15,9 +15,11 @@ class Mainwindow(QWidget):
         self.songslide = QSlider(1)
         self.songslide.setMinimum(0)
         self.songslide.setMaximum(100)
+        self.songslide.setSingleStep(1)
         self.volumeslide = QSlider(1)
         self.volumeslide.setMinimum(0)
         self.volumeslide.setMaximum(100)
+        self.volumeslide.setSingleStep(10   )
         #listlay = QHBoxLayout()
         playlist = QTableView()
         PlayList_Model 	= QStringListModel()
@@ -38,6 +40,10 @@ class Mainwindow(QWidget):
         mainlayout.addWidget(playlist)
         self.setLayout(mainlayout)
         self.player = Player()
+        #time_change = pyqtSignal(int)
+        #self.Time = self.player.pipeline.get_clock().get_time()
+        
+        #time_change = pyqtSignal([self.player.pipeline.get_clock().get_time()], ['QString'])
         #QWidget.connect(playbut.clicked(),player.play_stop())
         QObject.connect(playbut, SIGNAL('clicked()'), self, SLOT('play()'))
         QObject.connect(nextbut, SIGNAL('clicked()'), self, SLOT('nextsong()'))
@@ -45,21 +51,34 @@ class Mainwindow(QWidget):
         QObject.connect(openbut, SIGNAL('clicked()'), self, SLOT('Open_Song()'))
         QObject.connect(self.volumeslide, SIGNAL('valueChanged(int)'), self, SLOT('Volume_Set(int)'))
         QObject.connect(self.songslide, SIGNAL('valueChanged(int)'), self, SLOT('Seek_Set(int)'))
+        #QObject.connect(self, SIGNAL('time_change(int)'), self, SLOT('show_time(int)'))
+    
+    '''@property
+    def Time(self):
+        return self.Time
+    @Time.setter
+    def Time(self):
+        self.Time = self.player.pipeline.get_clock().get_time()
+        self.time_change.emit(new_time,self.player.pipeline.get_clock().get_time())'''
+    
 
     @pyqtSlot()
     def play(self):
         self.player.play_stop()
     @pyqtSlot()
     def nextsong(self):
-        self.player.song_time()
+        print(self.player.song_duration())
         print('next')
     @pyqtSlot()
     def prevsong(self):
         print('prev')
     @pyqtSlot()
     def Open_Song(self):
+        
         file_name = QFileDialog.getOpenFileName(self,"Open Files", "~", "All Files (*.ogg)")
-        #self.player.play_next()
+        if file_name=='':
+            file_name = 'song.ogg'
+        #self.player.play_next(file_name)
         self.songslide.setMaximum(self.player.play_next(file_name))
         #self.player.song_time()
         
@@ -69,8 +88,11 @@ class Mainwindow(QWidget):
         self.player.setVolume(vol / 100)
     @pyqtSlot(int)
     def Seek_Set(self,sek):
-        print(self.songslide.sliderPosition())
+        #print(self.songslide.sliderPosition())
         self.player.shift_to(sek)
+    @pyqtSlot(int)
+    def show_time(self,time):
+        print(time)
         
         
 if __name__ == "__main__":
